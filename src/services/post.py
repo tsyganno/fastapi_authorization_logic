@@ -18,12 +18,8 @@ __all__ = ("PostService", "get_post_service")
 
 
 class PostService(ServiceMixin):
-    def __init__(self,
-                 cache: AbstractCache,
-                 access_cash: AbstractCache,
-                 session: Session):
+    def __init__(self, cache: AbstractCache, access_cash: AbstractCache, session: Session):
         super().__init__(cache=cache, session=session)
-
         self.blocked_access_tokens = access_cash
 
     def get_post_list(self) -> dict:
@@ -35,7 +31,6 @@ class PostService(ServiceMixin):
         """Получить детальную информацию поста."""
         if cached_post := self.cache.get(key=f"{item_id}"):
             return json.loads(cached_post)
-
         post = self.session.query(Post).filter(Post.id == item_id).first()
         if post:
             self.cache.set(key=f"{post.id}", value=post.json())
@@ -54,16 +49,12 @@ class PostService(ServiceMixin):
             payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
             jti = payload["jti"]
         except PyJWTError:
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
-            )
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Не удалось проверить учетные данные.")
         if self.check_block_token(jti):
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN, detail="Token was blocked"
-            )
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Токен был заблокирован.")
 
     def check_block_token(self, jti: str) -> bool:
-        """Checks the token among the blocked ones"""
+        """Проверка токена среди заблокированных"""
         if self.blocked_access_tokens.get(jti):
             return True
         return False
@@ -71,9 +62,6 @@ class PostService(ServiceMixin):
 
 # get_post_service — это провайдер PostService. Синглтон
 @lru_cache()
-def get_post_service(
-        cache: AbstractCache = Depends(get_cache),
-        access_cash: AbstractCache = Depends(get_access_cash),
-        session: Session = Depends(get_session),
-) -> PostService:
+def get_post_service(cache: AbstractCache = Depends(get_cache), access_cash: AbstractCache = Depends(get_access_cash),
+                     session: Session = Depends(get_session),) -> PostService:
     return PostService(cache=cache, session=session, access_cash=access_cash)
