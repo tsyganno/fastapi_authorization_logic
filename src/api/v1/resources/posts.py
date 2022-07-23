@@ -29,7 +29,8 @@ def post_detail(post_id: int, post_service: PostService = Depends(get_post_servi
 
 
 @router.post(path="/", response_model=PostModel, summary="Создать пост", tags=["posts"],)
-def post_create(post: PostCreate, post_service: PostService = Depends(get_post_service), token: str = Depends(reusable_oauth2)) -> PostModel:
+def post_create(post: PostCreate, post_service: PostService = Depends(get_post_service),
+                token: str = Depends(reusable_oauth2)) -> PostModel:
     post_service.check_jwt(token)
     post: dict = post_service.create_post(post=post)
     return PostModel(**post)

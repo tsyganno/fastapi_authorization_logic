@@ -37,7 +37,8 @@ def logout(user_service: UserService = Depends(get_user_service), token: str = D
 
 
 @router.post(path="/refresh", response_model=Token, summary="Обновить токен", tags=["users"])
-def refresh_token(user_service: UserService = Depends(get_user_service), token: str = Depends(reusable_oauth2)) -> Token:
+def refresh_token(user_service: UserService = Depends(get_user_service),
+                  token: str = Depends(reusable_oauth2)) -> Token:
     """Обновление токена"""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
@@ -52,11 +53,13 @@ def refresh_token(user_service: UserService = Depends(get_user_service), token: 
     user_data["created_at"] = str(user_data["created_at"])
     refresh_token = create_refresh_token(user_uuid=user_uuid)
     refresh_jti = user_service.get_jti(refresh_token)
-    return Token(**{"access_token": create_access_token(data=user_data, refresh_jti=refresh_jti), "refresh_token": refresh_token})
+    return Token(**{"access_token": create_access_token(data=user_data, refresh_jti=refresh_jti),
+                    "refresh_token": refresh_token})
 
 
 @router.patch(path="/users/me", summary="Обновить профиль", tags=["users"])
-def update_user_me(new_data: UserUpdate, user_service: UserService = Depends(get_user_service), token: str = Depends(reusable_oauth2)) -> dict:
+def update_user_me(new_data: UserUpdate, user_service: UserService = Depends(get_user_service),
+                   token: str = Depends(reusable_oauth2)) -> dict:
     """Обновление информации о пользователе"""
     current_user = user_service.get_current_user(token)
     new_user = user_service.update_user(current_user, new_data)

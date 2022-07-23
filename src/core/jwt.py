@@ -10,7 +10,8 @@ def create_access_token(*, data: dict, refresh_jti: str, expires_delta: timedelt
     jti = str(uuid.uuid4())
     to_encode = data.copy()
     time_now = datetime.utcnow()
-    to_encode.update({"iat": int(time_now.timestamp()), "jti": jti, "nbf": int(time_now.timestamp()), "refresh_jti": refresh_jti})
+    to_encode.update({"iat": int(time_now.timestamp()), "jti": jti, "nbf": int(time_now.timestamp()),
+                      "refresh_jti": refresh_jti})
     if expires_delta:
         expire = time_now + expires_delta
     else:
@@ -25,6 +26,7 @@ def create_refresh_token(*, user_uuid: str):
     time_delta = timedelta(days=30)
     jti = str(uuid.uuid4())
     expire = time_now + time_delta
-    to_encode = {"iat": int(time_now.timestamp()), "jti": jti, "type": "refresh", "uuid": user_uuid, "nbf": int(time_now.timestamp()), "exp": int(expire.timestamp())}
+    to_encode = {"iat": int(time_now.timestamp()), "jti": jti, "type": "refresh", "uuid": user_uuid,
+                 "nbf": int(time_now.timestamp()), "exp": int(expire.timestamp())}
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, JWT_ALGORITHM)
     return encoded_jwt
