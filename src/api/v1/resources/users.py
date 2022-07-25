@@ -102,10 +102,15 @@ def login(user: UserLogin, user_service: UserService = Depends(get_user_service)
 
 
 @router.post(path="/signup", status_code=201, summary="Зарегистрировать пользователя", tags=["users"])
-def user_create(
-        user: UserCreate, user_service: UserService = Depends(get_user_service),) -> dict:
+def user_create(user: UserCreate, user_service: UserService = Depends(get_user_service),) -> dict:
     """Регистрация пользователя"""
-    response = {"message": "Пользователь создан."}
-    user: dict = user_service.create_user(user=user)
-    response.update({"user": UserModel(**user)})
-    return response
+    try:
+        response = {"message": "Пользователь создан."}
+        user: dict = user_service.create_user(user=user)
+        response.update({"user": UserModel(**user)})
+        return response
+    except:
+        response = {"message": "Пользователь с таким логином или паролем уже существует."}
+        return response
+
+
